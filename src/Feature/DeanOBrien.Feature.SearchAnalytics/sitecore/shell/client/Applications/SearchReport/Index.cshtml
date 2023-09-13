@@ -1,0 +1,453 @@
+﻿@model DeanOBrien.Feature.SearchAnalytics.Models.SearchReportViewModel
+<html>
+<head>
+    <script src="/sitecore/shell/client/Applications/SearchReport/js/jquery-1.12.4.min.js" charset="utf-8" type="text/javascript"></script>
+    <link rel="shortcut icon" href="/sitecore/images/favicon.ico" />
+    <link href="/sitecore/shell/client/Applications/LaunchPad/LaunchPad.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link href="/sitecore/shell/client/Applications/ExperienceAnalytics/Common/ExperienceAnalytics.css" rel="stylesheet" type="text/css" />
+    <link href="/sitecore/shell/client/Applications/SearchReport/css/SearchReport.css" rel="stylesheet" type="text/css" />
+</head>
+<body class="sc">
+    <header class="sc-globalHeader">
+        <div class="row sc-globalHeader-content">
+            <div class="col-md-3">
+                <div class="sc-globalHeader-startButton">
+                    <a class="sc-global-logo medium" href="/sitecore/shell/sitecore/client/applications/launchpad"></a>
+                </div>
+                <div class="sc-globalHeader-navigationToggler">
+
+                </div>
+                <div class="sc-globalheader-appName">
+
+                </div>
+            </div>
+            <div class="col-md-6 report-header" style="@(string.IsNullOrWhiteSpace(@Model.ItemId) ? "background-color:gold;color:#000;" : "background-color:deepskyblue;color:#fff;")"><p><span id="report-title">@(string.IsNullOrWhiteSpace(@Model.ItemDisplayName) ? "Report on all Popular Terms and Items" : ""+ @Model.ItemDisplayName)</span></p></div>
+            <div class="col-md-3">
+                <div class="sc-globalHeader-loginInfo">
+                    <ul data-sc-id="c_c642516f92b266a2" class="sc-accountInformation sc_AccountInformation_3 data-sc-registered" data-sc-require="/-/speak/v1/business/AccountInformation.js">
+                        <li>
+                            Administrator
+                            <img src="/temp/iconcache/office/32x32/default_user.png">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    <section class="sc-applicationContent">
+        <header class="sc-applicationHeader">
+
+            <div class="sc-applicationHeader-row1 no-breadcrumb">
+                <div class="sc-applicationHeader-content">
+                    <div class="sc-applicationHeader-title">
+                        <span data-sc-id="Text2" class="sc-text sc_Text_8 data-sc-registered" data-bind="text: text, visible: isVisible" data-sc-require="/-/speak/v1/business/text.js">Sitecore Experience Platform</span>
+                    </div>
+                </div>
+            </div>
+
+        </header>
+    </section>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header" style="background-color: @(string.IsNullOrWhiteSpace(@Model.ItemId) ? "gold" : "deepskyblue");">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+
+                @if (string.IsNullOrWhiteSpace(@Model.ItemId))
+                {
+                    <a class="navbar-brand" href="#" style="color:black;font-weight:bold;margin:0 20px;">Global Report</a>
+                }
+                else
+                {
+                    <a class="navbar-brand" href="#" style="color:white;font-weight:bold;margin:0 20px;">Item Report</a>
+                }
+
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    @if (string.IsNullOrWhiteSpace(@Model.ItemId))
+                    {
+                        <li @(string.IsNullOrWhiteSpace(Model.Display) || Model.Display == "total" ? "class=active" : "") id="TotalSearches-button"><a class="nav-item nav-link searchterm-button" href="javascript:void(0)" onclick="javascript: showSection('TotalSearches');return false">Top Searches</a></li>
+                        <li @(Model.Display == "duration" ? "class=active" : "") id="RankAdjustedByDuration-button"><a class="nav-item nav-link searchterm-button" href="javascript:void(0)" onclick="javascript: showSection('RankAdjustedByDuration');return false">Most Variation (by Duration)</a></li>
+                        <li @(Model.Display == "visits" ? "class=active" : "") id="RankAdjustedByVisits-button"><a class="nav-item nav-link searchterm-button" href="javascript:void(0)" onclick="javascript: showSection('RankAdjustedByVisits');return false">Most Variation (by Visit)</a></li>
+                    }
+                    else
+                    {
+                        <li @(string.IsNullOrWhiteSpace(Model.Display) || Model.Display == "duration" ? "class=active" : "") id="RankAdjustedByDuration-button"><a class="nav-item nav-link searchterm-button" href="javascript:void(0)" onclick="javascript: showSection('RankAdjustedByDuration');return false">Terms (Longest duration)<span class="sr-only">(current)</span></a></li>
+                        <li @(Model.Display == "clickthrough" ? "class=active" : "") id="ClickThroughs-button"><a class="nav-item nav-link searchterm-button" href="javascript:void(0)" onclick="javascript: showSection('ClickThroughs');return false">Terms (Most Click Throughs)</a></li>
+                        <li @(Model.Display == "ranking" ? "class=active" : "") id="SearchRankings-button"><a class="nav-item nav-link searchterm-button" href="javascript:void(0)" onclick="javascript: showSection('SearchRankings');return false">Highest Ranking Terms</a></li>
+                    }
+
+                </ul>
+                <form class="navbar-form navbar-left" role="search">
+                    <div class="form-group">
+                        <input type="text" id="searchTerm" name="searchTerm" class="form-control" placeholder="Search">
+                        <input type="hidden" id="id" name="id" value="@Model.ItemId">
+                    </div>
+                    <button type="submit" class="btn btn-default">Submit</button>
+                </form>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="active"><a class="nav-item nav-link mr-auto">Search Term: <b><span id="searchTermDisplay" style="color:#00f"></span></b></a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+    </nav>
+    @if (string.IsNullOrWhiteSpace(Model.ItemId))
+    {
+
+        /*
+        // GLOBAL
+        */
+
+        <div class="row">
+            <div class="col-md-2">
+                <div id="TotalSearches" class="searchterm-section">
+                    <p><b>Top Searches</b></p>
+                    <div>
+                        @foreach (var item in Model.TotalSearchesForAllTerms)
+                        {
+                            <div class="row">
+                                <div class='col-md-12'>
+                                    <div class='thumbnail'>
+                                        <div class='row'>
+                                            <div class='col-md-3'>
+                                                <div class="feeddate thumbnail btn-block">@item.Item1</div>
+                                            </div>
+                                            <div class='col-md-9'>
+                                                <b>
+                                                    <a href="?searchTerm=@item.Item2&display=total">@item.Item2</a>
+                                                </b>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div id="RankAdjustedByDuration" style="display:none" class="searchterm-section">
+                    <p><b>Most Variation (by Duration)</b></p>
+                    <div>
+                        @foreach (var item in Model.SearchTermsByEngagement.OrderByDescending(x => x.Item2))
+                        {
+                            <div class="row">
+                                <div class='col-md-12'>
+                                    <div class='thumbnail'>
+                                        <div class='row'>
+                                            <div class='col-md-3'>
+                                                <div class="feeddate thumbnail btn-block">@item.Item2</div>
+                                            </div>
+                                            <div class='col-md-9'>
+                                                <b>
+                                                    <a href="?searchTerm=@item.Item1&display=duration">@item.Item1</a>
+                                                </b>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div id="RankAdjustedByVisits" style="display:none" class="searchterm-section">
+                    <p><b>Most Variation (by Visit)</b></p>
+                    <div>
+                        @foreach (var item in Model.SearchTermsByEngagement.OrderByDescending(x => x.Item3))
+                        {
+                            <div class="row">
+                                <div class='col-md-12'>
+                                    <div class='thumbnail'>
+                                        <div class='row'>
+                                            <div class='col-md-3'>
+                                                <div class="feeddate thumbnail btn-block">@item.Item3</div>
+                                            </div>
+                                            <div class='col-md-9'>
+                                                <b>
+                                                    <a href="?searchTerm=@item.Item1&display=visit">@item.Item1</a>
+                                                </b>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div style="width:100%" id="daily">
+                    <div>
+                        <p><b>Daily Searches (for "@Model.SearchTerm")</b></p>
+                        <canvas id="DailySearchCanvas" height="250" width="600"></canvas>
+                        <div id="DailySearch-js-legend" class="chart-legend"></div>
+                    </div>
+                </div>
+                <div style="width:100%;display:none" id="visits" class="engagement-chart">
+                    <div>
+                        <p><b>Total Visits (for "@Model.SearchTerm")</b></p>
+                        <canvas id="VisitsCanvas" height="300" width="600"></canvas>
+                        <div id="VisitsCanvas-js-legend" class="chart-legend"></div>
+                    </div>
+                </div>
+                <div style="width:100%" id="duration" class="engagement-chart">
+                    <div>
+                        <p><b>Total Duration <small>[AVERAGE x VISITS]</small> (for "@Model.SearchTerm")</b></p>
+                        <canvas id="DurationCanvas" height="300" width="600"></canvas>
+                        <div id="Duration-js-legend" class="chart-legend"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div>
+                    Sort By:
+                    <a href="javascript:void(0)" onclick="javascript: show('AdjustedDurationRankingsForTerm', true); return false;" class="btn btn-primary engagement-button" id="duration-button">Duration</a>
+                    <a href="javascript:void(0)" onclick="javascript: show('AdjustedVisitRankingsForTerm', true); return false;" class="btn btn-default engagement-button" id="visit-button">Visit</a>
+                </div>
+                <br /><br />
+                <div id="AdjustedDurationRankingsForTerm" class="engagement-section"></div>
+                <div id="AdjustedVisitRankingsForTerm" style="display:none" class="engagement-section"></div>
+            </div>
+        </div>
+
+        <script>
+
+        </script>
+    }
+    else
+    {
+
+        /*
+        // SINGLE ITEM
+        */
+        if (Model.SearchRankings.Count == 0)
+        {
+            <p><b>No Search Data</b></p>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-md-2">
+                    <div id="SearchRankings" style="display:none" class="searchterm-section">
+                        <p><b>Highest Ranking Terms</b></p>
+                        <div>
+                            @foreach (var item in Model.SearchRankings)
+                            {
+                                DateTime rankDay = Convert.ToDateTime(item.Item3);
+
+                                <div class="row">
+                                    <div class='col-md-12'>
+                                        <div class='thumbnail'>
+                                            <div class='row'>
+                                                <div class='col-md-3'>
+                                                    <div class="feeddate thumbnail btn-block">@item.Item2</div>
+                                                </div>
+                                                <div class='col-md-9'>
+                                                    <b>
+                                                        <a href="?id=@Model.ItemId&searchTerm=@item.Item1&display=ranking">@item.Item1</a>
+
+                                                    </b>
+
+                                                    <br />
+                                                    <small><i>on @(rankDay.Day)/@(rankDay.Month)/@(rankDay.Year)</i></small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div id="ClickThroughs" style="display:none" class="searchterm-section">
+                        <p><b>Terms (Most Click Throughs)</b></p>
+                        <div>
+                            @foreach (var item in Model.TotalClickThroughs)
+                            {
+                                <div class="row">
+                                    <div class='col-md-12'>
+                                        <div class='thumbnail'>
+                                            <div class='row'>
+                                                <div class='col-md-3'>
+                                                    <div class="feeddate thumbnail btn-block">@item.Item2</div>
+                                                </div>
+                                                <div class='col-md-9'>
+                                                    <b>
+                                                        <a href="?id=@Model.ItemId&searchTerm=@item.Item1&display=clickthrough">@item.Item1</a>
+                                                    </b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div id="RankAdjustedByDuration" style="display:block" class="searchterm-section">
+                        <p><b>Terms (Longest duration)</b></p>
+                        <div>
+                            @foreach (var item in Model.AverageDurations)
+                            {
+                                <div class="row">
+                                    <div class='col-md-12'>
+                                        <div class='thumbnail'>
+                                            <div class='row'>
+                                                <div class='col-md-3'>
+                                                    <div class="feeddate thumbnail btn-block">@item.Item1.ToString("0.#")</div>
+                                                </div>
+                                                <div class='col-md-9'>
+                                                    <b>
+                                                        <a href="?id=@Model.ItemId&searchTerm=@item.Item3&display=duration">@item.Item3</a>
+                                                        <br /> <small><i>From @item.Item2 visits</i></small>
+                                                    </b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <p><b>Search Ranking for term: @Model.SearchTerm</b></p>
+                    <div style="width:100%" id="daily">
+                        <div>
+                            <canvas id="canvas" height="400" width="600"></canvas>
+                            <div id="js-legend" class="chart-legend"></div>
+                        </div>
+                    </div>
+                    <p><b>Click Throughs for term: @Model.SearchTerm</b></p>
+                    <div style="width:100%" id="daily">
+                        <div>
+                            <canvas id="clickThroughCanvas" height="400" width="600"></canvas>
+                            <div id="clickThrough-js-legend" class="chart-legend"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div>
+                        Sort By:
+                        <a href="javascript:void(0)" onclick="javascript: show('AdjustedDurationRankingsForTerm', false); return false;" class="btn btn-primary engagement-button" id="duration-button">Duration</a>
+                        <a href="javascript:void(0)" onclick="javascript: show('AdjustedVisitRankingsForTerm', false); return false;" class="btn btn-default engagement-button" id="visit-button">Visit</a>
+                    </div>
+                    <br /><br />
+                    <div id="AdjustedDurationRankingsForTerm" class="engagement-section"></div>
+                    <div id="AdjustedVisitRankingsForTerm" style="display:none" class="engagement-section"></div>
+                </div>
+            </div>
+            <style>
+            #item-@(Model.ItemId.ToLower()) {
+                border: 5px solid lightskyblue;
+            }
+            </style>
+        }
+    }
+    <script id="AdjustedDurationRankingsForTermTpl" type="text/template">
+        <div class='col-md-12'>
+            <div class='thumbnail' id="item-{{ItemId}}">
+                <div class='row'>
+                    <div class='col-md-2'>
+                        <div class="feeddate thumbnail btn-block" style="font-size:18px">
+                            <b>{{TotalDurationRank}}</b>
+                        </div>
+                        <br />
+                        {{TotalDuration}} secs <br />
+                        <small>Total Duration</small>
+                    </div>
+                    <div class='col-md-1'>
+                        <img src="/sitecore/shell/client/applications/searchreport/img/{{TotalDurationMovementImage}}"><br />
+                        {{TotalDurationGain}}
+                    </div>
+                    <div class='col-md-9'>
+                        <p><b><a href="?id={{ItemId}}">{{DisplayName}}</a></b></p>
+                        <p>Previous Rank: {{ExistingRank}} | Average Duration {{AverageDuration}} | Visits {{Visits}} | Item Id {{ItemId}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script id="AdjustedVisitRankingsForTermTpl" type="text/template">
+        <div class='col-md-12'>
+            <div class='thumbnail'>
+                <div class='row'>
+                    <div class='col-md-2'>
+                        <div class="feeddate thumbnail btn-block" style="font-size:18px">
+                            {{VisitRank}}
+                        </div>
+                        <br />
+                        {{Visits}} <br />
+                        <small>Visits</small>
+                    </div>
+                    <div class='col-md-1'>
+                        <img src="/sitecore/shell/client/applications/searchreport/img/{{VisitMovementImage}}"><br />
+                        {{VisitGain}}
+                    </div>
+                    <div class='col-md-9'>
+                        <p><b><a href="?id={{ItemId}}">{{DisplayName}}</a></b></p>
+                        <p>Previous Rank: {{ExistingRank}} | Average Duration {{AverageDuration}} | Item Id {{ItemId}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script src="/sitecore/shell/client/Applications/SearchReport/js/mustache.js" charset="utf-8" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var searchTerm = "@Model.SearchTerm";
+        @if (!string.IsNullOrWhiteSpace(Model.ItemId))
+        {
+            <text>var itemId ="@Model.ItemId.ToLower()";</text>
+        }
+        else
+        {
+            <text>var itemId = null;</text>
+        }
+        function updateSearchTerm(searchterm, global) {
+            $("#searchTermDisplay").empty();
+            $("#searchTermDisplay").append(searchTerm);
+
+            if (global) {
+                showAdjustedDurationRankingsForTerm(window.Duration, searchterm, true);
+                getDailySearchData(window.DailySearch, searchterm);
+            } else {
+                showAdjustedDurationRankingsForTerm(window.Duration, searchterm, false);
+                getClickThroughData(window.ClickThrough, itemId, searchterm);
+                getSearchRankingData(window.SearchRanking, itemId, searchterm);
+            }
+
+            @if ((string.IsNullOrWhiteSpace(Model.Display)&&!string.IsNullOrWhiteSpace(Model.ItemId)) || Model.Display == "duration") {
+                <text>showSection("RankAdjustedByDuration")</text>
+            }
+            else if (Model.Display == "rankings") {
+                <text>showSection("ClickThroughs")</text>
+            }
+            else if (Model.Display == "clickthrough") {
+                <text>showSection("SearchRankings")</text>
+            }
+            else if((string.IsNullOrWhiteSpace(Model.Display)&& string.IsNullOrWhiteSpace(Model.ItemId)) || Model.Display == "total") {
+                <text>showSection("TotalSearches")</text>
+            }
+            else if (Model.Display == "visit") {
+                <text>showSection("RankAdjustedByVisits")</text>
+            }
+            else {
+                <text>showSection("RankAdjustedByDuration")</text>
+            }
+        }
+    </script>
+    <script src="/sitecore/shell/client/Applications/SearchReport/js/SearchReport.js" charset="utf-8" type="text/javascript"></script>
+
+    @if (string.IsNullOrWhiteSpace(Model.ItemId))
+    {
+        <script src="/sitecore/shell/client/Applications/SearchReport/js/SearchReport-Global.js" charset="utf-8" type="text/javascript"></script>
+    }
+    else
+    {
+        <script src="/sitecore/shell/client/Applications/SearchReport/js/SearchReport-SingleItem.js" charset="utf-8" type="text/javascript"></script>
+    }
+</body>
+</html>
