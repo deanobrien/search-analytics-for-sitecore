@@ -13,14 +13,14 @@ using System.Web.Mvc;
 
 namespace DeanOBrien.Feature.SearchAnalytics.Controllers
 {
-    public class SearchController : Controller
+    public class ExampleSearchController : Controller
     {
         private ISearchService _SearchService;
         private string _term;
         private ITrackSearch _trackSearch;
         private readonly ISearchStore _searchStore;
 
-        public SearchController(ISearchService SearchService, ITrackSearch trackSearch, ISearchStore searchStore)
+        public ExampleSearchController(ISearchService SearchService, ITrackSearch trackSearch, ISearchStore searchStore)
         {
             _SearchService = SearchService;
             _trackSearch = trackSearch;
