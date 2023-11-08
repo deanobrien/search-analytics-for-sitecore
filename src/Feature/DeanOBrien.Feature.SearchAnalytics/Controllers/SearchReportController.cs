@@ -24,6 +24,8 @@ namespace DeanOBrien.Feature.SearchAnalytics.Controllers
         }
         public ActionResult SearchReport(string id = null, string searchTerm = null, string display = null)
         {
+            if (!string.IsNullOrWhiteSpace(id)) id = EnsureUpperAndCurlBrackets(id);
+
             var isUpToDate = MemoryCache.Default.Get(DateTime.Now.Day.ToString() + DateTime.Now.Month.ToString() + DateTime.Now.Year.ToString()) == null ? false : true;
             if (!isUpToDate)
             {
@@ -115,7 +117,7 @@ namespace DeanOBrien.Feature.SearchAnalytics.Controllers
                 if (sitecoreItem == null) continue;
 
                 var rankComparison = new RankComparison();
-                rankComparison.ItemId = item.Item1;
+                rankComparison.ItemId = RemoveUpperAndCurlBrackets(item.Item1);
                 rankComparison.ExistingRank = item.Item2;
                 rankComparison.DisplayName = sitecoreItem.DisplayName;
                 rankComparison.TotalDuration = item.Item4.ToString("0.0");
@@ -143,7 +145,7 @@ namespace DeanOBrien.Feature.SearchAnalytics.Controllers
                 if (sitecoreItem == null) continue;
 
                 var rankComparison = new RankComparison();
-                rankComparison.ItemId = item.Item1;
+                rankComparison.ItemId = RemoveUpperAndCurlBrackets(item.Item1);
                 rankComparison.ExistingRank = item.Item2;
                 rankComparison.DisplayName = sitecoreItem.DisplayName;
                 rankComparison.TotalDuration = item.Item4.ToString("0.0");
@@ -154,6 +156,19 @@ namespace DeanOBrien.Feature.SearchAnalytics.Controllers
                 model.RankComparisons.Add(rankComparison);
             }
             model.RankComparisons = model.RankComparisons.OrderBy(x => x.VisitRank).ToList(); return Json(model, JsonRequestBehavior.AllowGet);
+        }
+        private static string RemoveUpperAndCurlBrackets(string itemId)
+        {
+            itemId = itemId.ToUpper();
+            if (itemId.Contains("{")) { itemId = itemId.Replace("{",""); }
+            if (itemId.Contains("}")) { itemId = itemId.Replace("}", ""); }
+            return itemId;
+        }
+        private static string EnsureUpperAndCurlBrackets(string itemId)
+        {
+            itemId = itemId.ToUpper();
+            if (!itemId.Contains("{")) itemId = "{" + itemId + "}";
+            return itemId;
         }
     }
 }

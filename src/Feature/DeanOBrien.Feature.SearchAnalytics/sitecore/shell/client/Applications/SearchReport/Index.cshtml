@@ -340,7 +340,7 @@
                 </div>
             </div>
             <style>
-            #item-@(Model.ItemId.ToLower()) {
+            #item-@(Model.ItemId.Replace("{", "").Replace("}", "")) {
                 border: 5px solid lightskyblue;
             }
             </style>
@@ -400,7 +400,7 @@
         var searchTerm = "@Model.SearchTerm";
         @if (!string.IsNullOrWhiteSpace(Model.ItemId))
         {
-            <text>var itemId ="@Model.ItemId.ToLower()";</text>
+            <text>var itemId ="@Model.ItemId";</text>
         }
         else
         {

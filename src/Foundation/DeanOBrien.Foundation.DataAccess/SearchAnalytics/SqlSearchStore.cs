@@ -85,6 +85,7 @@ namespace DeanOBrien.Foundation.DataAccess.SearchAnalytics
         */
         public bool AddSearchClickThroughRecord(double duration, string itemId, string searchTerm, DateTime date)
         {
+            itemId = EnsureUpperAndCurlBrackets(itemId);
             try
             {
                 using (var conn = new SqlConnection(_connectionString))
@@ -117,6 +118,7 @@ namespace DeanOBrien.Foundation.DataAccess.SearchAnalytics
         */
         public bool AddSearchRankingRecord(string itemId, string searchTerm, int rank, DateTime date)
         {
+            itemId = EnsureUpperAndCurlBrackets(itemId);
             try
             {
                 using (var conn = new SqlConnection(_connectionString))
@@ -143,6 +145,14 @@ namespace DeanOBrien.Foundation.DataAccess.SearchAnalytics
                 return false;
             }
         }
+
+        private static string EnsureUpperAndCurlBrackets(string itemId)
+        {
+            itemId = itemId.ToUpper();
+            if (!itemId.Contains("{")) itemId = "{" + itemId + "}";
+            return itemId;
+        }
+
         /*
         // Used to check if search ranking registered on a given day
         // Table: SearchRankings

@@ -38,12 +38,14 @@ namespace DeanOBrien.Feature.SearchAnalytics.Pipeline
                 return;
             }
             string searchPageUrlPartial = Sitecore.Configuration.Settings.GetSetting("SearchPageUrlPartial");
+            string searchPageParameterName = Sitecore.Configuration.Settings.GetSetting("SearchPageParameterName");
+
 
             var previousPage = HttpContext.Current?.Request?.UrlReferrer?.AbsoluteUri;
             if (!string.IsNullOrWhiteSpace(previousPage) && previousPage.Contains(searchPageUrlPartial))
             {
                 Uri previousUri = new Uri(previousPage);
-                string query = HttpUtility.ParseQueryString(previousUri.Query).Get("q");
+                string query = HttpUtility.ParseQueryString(previousUri.Query).Get(searchPageParameterName);
                 if (!string.IsNullOrWhiteSpace(query))
                 {
                     _trackSearch.TrackSiteSearchClick(Context.Item, query);
