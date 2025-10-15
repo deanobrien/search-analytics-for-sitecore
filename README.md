@@ -25,3 +25,5 @@ Some of the key benefits of this module are as follows:
  6) Go to Dashboard => Search Report
  
 > Detailed install guide can be found here: [DeanOBrien: How to install the Search Analytics Module for Sitecore](https://deanobrien.uk/install-search-analytics-for-sitecore/).
+
+> If you try this module and find it helpful or have any issues - it would be nice to know via LinkedIn or Slack!
